@@ -25,15 +25,15 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
         const { data } = await supabase.auth.getSession()
         
         if (!data.session) {
-          console.log("No session found in client, redirecting to login")
+          // console.log("No session found in client, redirecting to login")
           router.push("/login")
         } else {
-          console.log("Session found in client")
+          // console.log("Session found in client")
           setIsAuthenticated(true)
           setLoading(false)
         }
       } catch (error) {
-        console.error("Error checking session:", error)
+        // console.error("Error checking session:", error)
         router.push("/login")
       }
     }

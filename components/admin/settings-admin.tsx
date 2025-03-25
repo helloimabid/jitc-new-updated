@@ -12,20 +12,22 @@ import { Input } from "@/components/ui/input"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Lock, UserCircle, Bell, Shield, RefreshCw } from "lucide-react"
+import { Lock, UserCircle, Bell, RefreshCw } from "lucide-react"
 
 interface AdminSettingsProps {
   userEmail?: string
 }
 
-const passwordSchema = z.object({
-  currentPassword: z.string().min(6, "Password must be at least 6 characters"),
-  newPassword: z.string().min(6, "Password must be at least 6 characters"),
-  confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
-})
+const passwordSchema = z
+  .object({
+    currentPassword: z.string().min(6, "Password must be at least 6 characters"),
+    newPassword: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  })
 
 const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -36,7 +38,7 @@ export default function AdminSettings({ userEmail }: AdminSettingsProps) {
   const [activeTab, setActiveTab] = useState("profile")
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
-  
+
   const supabase = createClient()
 
   // Password form
@@ -61,7 +63,7 @@ export default function AdminSettings({ userEmail }: AdminSettingsProps) {
   const onPasswordSubmit = async (values: z.infer<typeof passwordSchema>) => {
     setLoading(true)
     setMessage(null)
-    
+
     try {
       const { error } = await supabase.auth.updateUser({
         password: values.newPassword,
@@ -83,11 +85,11 @@ export default function AdminSettings({ userEmail }: AdminSettingsProps) {
   const onProfileSubmit = async (values: z.infer<typeof profileSchema>) => {
     setLoading(true)
     setMessage(null)
-    
+
     try {
       const { error } = await supabase.auth.updateUser({
         email: values.email,
-        data: { name: values.name }
+        data: { name: values.name },
       })
 
       if (error) {
@@ -103,21 +105,15 @@ export default function AdminSettings({ userEmail }: AdminSettingsProps) {
   }
 
   return (
-    <div className="container mx-auto">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+    <div className="w-full max-w-full px-4 sm:px-6 lg:px-8">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Account Settings</h2>
-          <p className="text-gray-500 dark:text-gray-400 mt-2">
-            Manage your account settings and preferences
-          </p>
+          <p className="text-gray-500 dark:text-gray-400 mt-2">Manage your account settings and preferences</p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="mb-8">
+          <TabsList className="mb-8 w-full sm:w-auto flex flex-wrap">
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <UserCircle className="h-4 w-4" />
               Profile
@@ -133,7 +129,9 @@ export default function AdminSettings({ userEmail }: AdminSettingsProps) {
           </TabsList>
 
           {message && (
-            <div className={`p-4 mb-6 rounded-md ${message.type === "success" ? "bg-green-100/10 border border-green-500 text-green-500" : "bg-red-100/10 border border-red-500 text-red-500"}`}>
+            <div
+              className={`p-4 mb-6 rounded-md ${message.type === "success" ? "bg-green-100/10 border border-green-500 text-green-500" : "bg-red-100/10 border border-red-500 text-red-500"}`}
+            >
               {message.text}
             </div>
           )}
@@ -142,9 +140,7 @@ export default function AdminSettings({ userEmail }: AdminSettingsProps) {
             <Card className="border border-gray-200 dark:border-gray-800">
               <CardHeader>
                 <CardTitle>Profile Information</CardTitle>
-                <CardDescription>
-                  Update your account profile information and email address
-                </CardDescription>
+                <CardDescription>Update your account profile information and email address</CardDescription>
               </CardHeader>
               <CardContent>
                 <Form {...profileForm}>
@@ -158,9 +154,7 @@ export default function AdminSettings({ userEmail }: AdminSettingsProps) {
                           <FormControl>
                             <Input placeholder="Your name" {...field} />
                           </FormControl>
-                          <FormDescription>
-                            This is your public display name.
-                          </FormDescription>
+                          <FormDescription>This is your public display name.</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -174,9 +168,7 @@ export default function AdminSettings({ userEmail }: AdminSettingsProps) {
                           <FormControl>
                             <Input placeholder="your.email@example.com" {...field} />
                           </FormControl>
-                          <FormDescription>
-                            This email will be used for important notifications.
-                          </FormDescription>
+                          <FormDescription>This email will be used for important notifications.</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -201,9 +193,7 @@ export default function AdminSettings({ userEmail }: AdminSettingsProps) {
             <Card className="border border-gray-200 dark:border-gray-800">
               <CardHeader>
                 <CardTitle>Password</CardTitle>
-                <CardDescription>
-                  Update your password to keep your account secure
-                </CardDescription>
+                <CardDescription>Update your password to keep your account secure</CardDescription>
               </CardHeader>
               <CardContent>
                 <Form {...passwordForm}>
@@ -267,9 +257,7 @@ export default function AdminSettings({ userEmail }: AdminSettingsProps) {
             <Card className="border border-gray-200 dark:border-gray-800">
               <CardHeader>
                 <CardTitle>Notification Preferences</CardTitle>
-                <CardDescription>
-                  Choose what notifications you want to receive
-                </CardDescription>
+                <CardDescription>Choose what notifications you want to receive</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex items-center justify-between">
@@ -310,4 +298,5 @@ export default function AdminSettings({ userEmail }: AdminSettingsProps) {
       </motion.div>
     </div>
   )
-} 
+}
+

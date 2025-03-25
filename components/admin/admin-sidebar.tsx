@@ -53,7 +53,6 @@ export default function AdminSidebar({ onToggle }: AdminSidebarProps) {
         }
         
         const unreadCount = contactData?.length || 0
-        console.log("Unread contact submissions:", contactData, "Count:", unreadCount)
         setUnreadContacts(unreadCount)
         
         // Get pending join submissions count
@@ -68,12 +67,10 @@ export default function AdminSidebar({ onToggle }: AdminSidebarProps) {
         }
         
         const pendingCount = joinData?.length || 0
-        console.log("Pending join submissions:", joinData, "Count:", pendingCount)
         setPendingJoins(pendingCount)
         
         // Set total notifications
         const totalCount = unreadCount + pendingCount
-        console.log("Total notifications:", totalCount)
         setTotalNotifications(totalCount)
       } catch (error) {
         console.error("Error fetching notifications:", error)
@@ -82,7 +79,7 @@ export default function AdminSidebar({ onToggle }: AdminSidebarProps) {
 
     fetchNotifications()
     
-    // Refresh notifications every 30 seconds (more frequent to catch changes)
+    // Refresh notifications every 30 seconds
     const interval = setInterval(fetchNotifications, 30000)
     
     // Check if sidebar preference is stored
@@ -93,10 +90,13 @@ export default function AdminSidebar({ onToggle }: AdminSidebarProps) {
     
     // Handle window resize
     const handleResize = () => {
-      const isMobileView = window.innerWidth < 1024
+      // Lower breakpoint to 1020px for more responsive behavior
+      const isMobileView = window.innerWidth < 1020
       setIsMobile(isMobileView)
+      
       if (isMobileView) {
         setCollapsed(true)
+        setMobileOpen(false)
       }
     }
     
@@ -108,7 +108,7 @@ export default function AdminSidebar({ onToggle }: AdminSidebarProps) {
       window.removeEventListener('resize', handleResize)
       clearInterval(interval)
     }
-  }, [pathname]) // Add pathname as dependency to refresh when route changes
+  }, [pathname])
 
   // Save collapsed state to localStorage
   useEffect(() => {
@@ -170,24 +170,19 @@ export default function AdminSidebar({ onToggle }: AdminSidebarProps) {
     }
   }
 
-  // Update the sign out function to properly clear cookies
   const handleSignOut = async () => {
     try {
       const supabase = createClient()
       
-      // Sign out on the client
       await supabase.auth.signOut()
       
-      // Make a request to server to clear session cookies
       await fetch('/api/auth/signout', {
         method: 'POST',
         credentials: 'include'
       })
       
-      // Redirect to login
       router.push('/login')
       
-      // Force a full page refresh to clear all state
       setTimeout(() => {
         window.location.href = '/login'
       }, 100)
@@ -198,16 +193,18 @@ export default function AdminSidebar({ onToggle }: AdminSidebarProps) {
 
   return (
     <>
-      {/* Mobile menu button */}
+      {/* Mobile/Tablet menu button */}
       <button
         onClick={toggleSidebar}
-        className="fixed top-4 left-4 z-50 lg:hidden bg-primary text-white p-2 rounded-lg shadow-md hover:bg-primary/90 transition-colors"
+        className={`fixed top-4 right-4 z-50 ${
+          isMobile ? 'block' : 'hidden'
+        } bg-primary text-white p-2 rounded-lg shadow-md hover:bg-primary/90 transition-colors`}
         aria-label={mobileOpen ? "Close menu" : "Open menu"}
       >
         {mobileOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
 
-      {/* Mobile overlay */}
+      {/* Mobile/Tablet overlay */}
       {isMobile && (
         <AnimatePresence>
           {mobileOpen && (
@@ -216,7 +213,7 @@ export default function AdminSidebar({ onToggle }: AdminSidebarProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setMobileOpen(false)}
-              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
+              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
             />
           )}
         </AnimatePresence>
@@ -237,7 +234,8 @@ export default function AdminSidebar({ onToggle }: AdminSidebarProps) {
             x: isMobile && !mobileOpen ? "-100%" : 0,
           }}
           transition={{ duration: 0.2 }}
-          className="fixed top-0 left-0 h-full bg-white dark:bg-gray-950 shadow-md z-40 overflow-hidden"
+          className={`fixed top-0 left-0 h-full bg-white dark:bg-gray-950 shadow-md z-50 overflow-hidden 
+            ${isMobile ? 'w-[240px]' : ''}`}
         >
           <div className="flex flex-col h-full">
             {/* Sidebar header */}
@@ -247,7 +245,7 @@ export default function AdminSidebar({ onToggle }: AdminSidebarProps) {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="text-xl font-bold"
+                  className="text-xl font-bold text-gray-800 dark:text-gray-200"
                 >
                   JITC Admin
                 </motion.h1>
@@ -257,9 +255,9 @@ export default function AdminSidebar({ onToggle }: AdminSidebarProps) {
                 className="p-1 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 ml-auto"
               >
                 {collapsed ? (
-                  <ChevronRight size={20} />
+                  <ChevronRight size={20} className="text-gray-600 dark:text-gray-300" />
                 ) : (
-                  <ChevronLeft size={20} />
+                  <ChevronLeft size={20} className="text-gray-600 dark:text-gray-300" />
                 )}
               </button>
             </div>
@@ -273,17 +271,20 @@ export default function AdminSidebar({ onToggle }: AdminSidebarProps) {
                     <li key={link.name}>
                       <Link
                         href={link.href}
-                        className={`flex items-center px-3 py-2 rounded-lg transition-colors ${
-                          isActive
-                            ? "bg-primary/10 text-primary"
-                            : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                        }`}
+                        className={`flex items-center px-3 py-2 rounded-lg transition-colors 
+                          ${isActive
+                            ? "bg-primary text-primary-foreground"
+                            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                          }`}
                       >
                         <link.icon
                           size={20}
-                          className={isActive ? "text-primary" : ""}
+                          className={isActive 
+                            ? "text-primary-foreground" 
+                            : "text-gray-500 dark:text-gray-400"
+                          }
                         />
-                        {!collapsed && (
+                        {(!collapsed || isMobile) && (
                           <motion.span
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -292,14 +293,14 @@ export default function AdminSidebar({ onToggle }: AdminSidebarProps) {
                           >
                             {link.name}
                             {link.notification ? (
-                              <span className="ml-2 bg-primary text-white text-xs py-0.5 px-1.5 rounded-full">
+                              <span className="ml-2 bg-primary text-primary-foreground text-xs py-0.5 px-1.5 rounded-full">
                                 {link.notification}
                               </span>
                             ) : null}
                           </motion.span>
                         )}
-                        {collapsed && link.notification ? (
-                          <span className="ml-2 bg-primary text-white text-xs py-0.5 px-1.5 rounded-full">
+                        {collapsed && !isMobile && link.notification ? (
+                          <span className="ml-2 bg-primary text-primary-foreground text-xs py-0.5 px-1.5 rounded-full">
                             {link.notification}
                           </span>
                         ) : null}
@@ -312,28 +313,12 @@ export default function AdminSidebar({ onToggle }: AdminSidebarProps) {
 
             {/* Sidebar footer */}
             <div className="p-4 border-t border-gray-200 dark:border-gray-800 space-y-2">
-              <Link
-                href="/admin/settings"
-                className="flex items-center px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 w-full"
-              >
-                <Settings size={20} />
-                {!collapsed && (
-                  <motion.span
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="ml-3"
-                  >
-                    Settings
-                  </motion.span>
-                )}
-              </Link>
               <button
                 onClick={handleSignOut}
-                className="flex items-center px-3 py-2 text-gray-400 hover:text-white rounded-md hover:bg-gray-800 w-full group"
+                className="flex items-center px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 w-full group"
               >
-                <LogOut className="h-5 w-5 mr-3" />
-                {!collapsed && <span>Sign Out</span>}
+                <LogOut className="h-5 w-5 mr-3 text-gray-500 dark:text-gray-400" />
+                {(!collapsed || isMobile) && <span>Sign Out</span>}
               </button>
             </div>
           </div>
@@ -353,4 +338,3 @@ export default function AdminSidebar({ onToggle }: AdminSidebarProps) {
     </>
   )
 }
-

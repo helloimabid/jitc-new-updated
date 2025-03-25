@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase"
-import { Eye, Trash2, CheckCircle, Search, Check, X, Clock, AlertCircle, CheckSquare, Filter } from "lucide-react"
+import { Eye, Trash2, Search, Check, X, Clock, AlertCircle, CheckSquare, Filter, UserPlus } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
 interface JoinAdminProps {
@@ -47,7 +47,7 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
   }, [])
 
   useEffect(() => {
-    let filtered = submissions;
+    let filtered = submissions
 
     if (searchTerm.trim() !== "") {
       filtered = filtered.filter(
@@ -55,16 +55,16 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
           `${submission.first_name} ${submission.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
           submission.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
           submission.class?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          submission.roll?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+          submission.roll?.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
     }
 
     if (statusFilter) {
-      filtered = filtered.filter(submission => submission.status === statusFilter);
+      filtered = filtered.filter((submission) => submission.status === statusFilter)
     }
 
-    setFilteredSubmissions(filtered);
-  }, [searchTerm, statusFilter, submissions]);
+    setFilteredSubmissions(filtered)
+  }, [searchTerm, statusFilter, submissions])
 
   const handleView = (submission: any) => {
     setSelectedSubmission(submission)
@@ -86,7 +86,7 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
 
     try {
       console.log("Attempting to approve join submission:", id)
-      
+
       const supabase = createClient()
       const { data, error } = await supabase
         .from("join_submissions")
@@ -103,17 +103,17 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
 
       setSuccessMessage("Submission approved successfully!")
       setSubmissions((prevSubmissions) =>
-        prevSubmissions.map((sub) => (sub.id === id ? { ...sub, status: "approved" } : sub))
+        prevSubmissions.map((sub) => (sub.id === id ? { ...sub, status: "approved" } : sub)),
       )
       setFilteredSubmissions((prevSubmissions) =>
-        prevSubmissions.map((sub) => (sub.id === id ? { ...sub, status: "approved" } : sub))
+        prevSubmissions.map((sub) => (sub.id === id ? { ...sub, status: "approved" } : sub)),
       )
-      
+
       // Auto-dismiss success message after 3 seconds
       setTimeout(() => {
         setSuccessMessage(null)
       }, 3000)
-      
+
       router.refresh()
     } catch (err: any) {
       console.error("Error approving submission:", err)
@@ -138,12 +138,12 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
         setSuccessMessage("Submission deleted successfully!")
         setSubmissions((prevSubmissions) => prevSubmissions.filter((sub) => sub.id !== id))
         setFilteredSubmissions((prevSubmissions) => prevSubmissions.filter((sub) => sub.id !== id))
-        
+
         // Auto-dismiss success message after 3 seconds
         setTimeout(() => {
           setSuccessMessage(null)
         }, 3000)
-        
+
         router.refresh()
       } catch (err: any) {
         setError(err.message)
@@ -167,32 +167,32 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "approved":
-        return <Check className="w-3 h-3 mr-1" />;
+        return <Check className="w-3 h-3 mr-1" />
       case "rejected":
-        return <X className="w-3 h-3 mr-1" />;
+        return <X className="w-3 h-3 mr-1" />
       default:
-        return <Clock className="w-3 h-3 mr-1" />;
+        return <Clock className="w-3 h-3 mr-1" />
     }
-  };
+  }
 
   const clearFilters = () => {
-    setSearchTerm("");
-    setStatusFilter(null);
-  };
+    setSearchTerm("")
+    setStatusFilter(null)
+  }
 
   return (
-    <div>
+    <div className="w-full max-w-full px-4 sm:px-6 lg:px-8">
       <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">Join Submissions</h2>
-        
+
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <div className="relative w-full sm:w-64">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-gray-500" />
             </div>
-            <input 
-              type="text" 
-              placeholder="Search submissions..." 
+            <input
+              type="text"
+              placeholder="Search submissions..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -227,7 +227,7 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
 
       <AnimatePresence>
         {error && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -244,7 +244,7 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
         )}
 
         {successMessage && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -254,14 +254,17 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
               <Check className="h-5 w-5 mr-2" />
               <span>{successMessage}</span>
             </div>
-            <button onClick={() => setSuccessMessage(null)} className="text-green-700 dark:text-green-400 hover:text-green-900">
+            <button
+              onClick={() => setSuccessMessage(null)}
+              className="text-green-700 dark:text-green-400 hover:text-green-900"
+            >
               <X className="h-5 w-5" />
             </button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden w-full">
         {loading && filteredSubmissions.length === 0 ? (
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -269,96 +272,208 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
         ) : filteredSubmissions.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
             <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-full mb-4">
-              <Search className="h-6 w-6 text-gray-500 dark:text-gray-400" />
+              <UserPlus className="h-6 w-6 text-gray-500 dark:text-gray-400" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">No submissions found</h3>
             <p className="text-gray-500 dark:text-gray-400 max-w-md">
-              {searchTerm || statusFilter ? "Try adjusting your search or filters" : "No join submissions available yet"}
+              {searchTerm || statusFilter
+                ? "Try adjusting your search or filters"
+                : "No join submissions available yet"}
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-900">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Class</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Section</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Roll Number</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {filteredSubmissions.map((submission) => (
-                  <motion.tr 
-                    key={submission.id} 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className={`${submission.status === 'pending' ? 'bg-yellow-50 dark:bg-yellow-900/10' : ''} hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors duration-150`}
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">
-                        {submission.first_name} {submission.last_name}
+          <div className="w-full overflow-hidden">
+            <div className="sm:overflow-x-auto -mx-4 sm:mx-0">
+              {/* Mobile card view */}
+              <div className="block sm:hidden">
+                <div className="space-y-3 px-4">
+                  {filteredSubmissions.map((submission) => (
+                    <motion.div
+                      key={submission.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className={`${submission.status === "pending" ? "bg-yellow-50 dark:bg-yellow-900/10" : ""} bg-white dark:bg-gray-800 p-4 rounded-lg shadow border border-gray-200 dark:border-gray-700`}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-medium text-gray-900 dark:text-white">
+                            {submission.first_name} {submission.last_name}
+                          </h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{submission.email}</p>
+                          <div className="mt-2 flex items-center">
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(submission.status)}`}
+                            >
+                              {getStatusIcon(submission.status)}
+                              {submission.status}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleView(submission)}
+                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                            title="View details"
+                          >
+                            <Eye className="h-4 w-4" />
+                            <span className="sr-only">View</span>
+                          </button>
+                          <button
+                            onClick={() => handleApprove(submission.id)}
+                            className={`${
+                              submission.status === "approved"
+                                ? "text-gray-400 cursor-not-allowed"
+                                : "text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
+                            } transition-colors`}
+                            disabled={submission.status === "approved"}
+                            title="Approve submission"
+                          >
+                            <CheckSquare className="h-4 w-4" />
+                            <span className="sr-only">Approve</span>
+                          </button>
+                          <button
+                            onClick={() => handleDelete(submission.id)}
+                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                            title="Delete submission"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Delete</span>
+                          </button>
+                        </div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{submission.email}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{submission.class}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{submission.section}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{submission.roll}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(submission.status)}`}>
-                        {getStatusIcon(submission.status)}
-                        {submission.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-3">
-                        <button
-                          onClick={() => handleView(submission)}
-                          className="inline-flex items-center text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
-                          title="View details"
-                        >
-                          <Eye className="h-4 w-4" />
-                          <span className="sr-only">View</span>
-                        </button>
-                        <button
-                          onClick={() => handleApprove(submission.id)}
-                          className={`inline-flex items-center ${
-                            submission.status === 'approved' 
-                              ? 'text-gray-400 cursor-not-allowed' 
-                              : 'text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300'
-                          } transition-colors`}
-                          disabled={submission.status === 'approved'}
-                          title="Approve submission"
-                        >
-                          <CheckSquare className="h-4 w-4" />
-                          <span className="sr-only">Approve</span>
-                        </button>
-                        <button
-                          onClick={() => handleDelete(submission.id)}
-                          className="inline-flex items-center text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors"
-                          title="Delete submission"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Delete</span>
-                        </button>
+                      <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        <p>Class: {submission.class}</p>
+                        <p>Section: {submission.section}</p>
+                        <p>Roll: {submission.roll}</p>
                       </div>
-                    </td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Desktop table view */}
+              <div className="hidden sm:block">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-900">
+                    <tr>
+                      <th
+                        scope="col"
+                        className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Name
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Email
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Class
+                      </th>
+                      <th
+                        scope="col"
+                        className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Section
+                      </th>
+                      <th
+                        scope="col"
+                        className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Roll Number
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Status
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {filteredSubmissions.map((submission) => (
+                      <motion.tr
+                        key={submission.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className={`${submission.status === "pending" ? "bg-yellow-50 dark:bg-yellow-900/10" : ""} hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors duration-150`}
+                      >
+                        <td className="px-3 sm:px-6 py-4">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                            {submission.first_name} {submission.last_name}
+                          </div>
+                        </td>
+                        <td className="px-3 sm:px-6 py-4">
+                          <div className="text-sm text-gray-500 dark:text-gray-400">{submission.email}</div>
+                        </td>
+                        <td className="px-3 sm:px-6 py-4">
+                          <div className="text-sm text-gray-500 dark:text-gray-400">{submission.class}</div>
+                        </td>
+                        <td className="hidden md:table-cell px-3 sm:px-6 py-4">
+                          <div className="text-sm text-gray-500 dark:text-gray-400">{submission.section}</div>
+                        </td>
+                        <td className="hidden md:table-cell px-3 sm:px-6 py-4">
+                          <div className="text-sm text-gray-500 dark:text-gray-400">{submission.roll}</div>
+                        </td>
+                        <td className="px-3 sm:px-6 py-4">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(submission.status)}`}
+                          >
+                            {getStatusIcon(submission.status)}
+                            {submission.status}
+                          </span>
+                        </td>
+                        <td className="px-3 sm:px-6 py-4 text-sm font-medium">
+                          <div className="flex space-x-3">
+                            <button
+                              onClick={() => handleView(submission)}
+                              className="inline-flex items-center text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                              title="View details"
+                            >
+                              <Eye className="h-4 w-4" />
+                              <span className="sr-only">View</span>
+                            </button>
+                            <button
+                              onClick={() => handleApprove(submission.id)}
+                              className={`inline-flex items-center ${
+                                submission.status === "approved"
+                                  ? "text-gray-400 cursor-not-allowed"
+                                  : "text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
+                              } transition-colors`}
+                              disabled={submission.status === "approved"}
+                              title="Approve submission"
+                            >
+                              <CheckSquare className="h-4 w-4" />
+                              <span className="sr-only">Approve</span>
+                            </button>
+                            <button
+                              onClick={() => handleDelete(submission.id)}
+                              className="inline-flex items-center text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                              title="Delete submission"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">Delete</span>
+                            </button>
+                          </div>
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -366,9 +481,17 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
       {/* View Submission Modal */}
       <AnimatePresence>
         {selectedSubmission && isViewModalOpen && (
-          <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-            <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0" onClick={(e) => e.stopPropagation()}>
-              <motion.div 
+          <div
+            className="fixed inset-0 z-50 overflow-y-auto"
+            aria-labelledby="modal-title"
+            role="dialog"
+            aria-modal="true"
+          >
+            <div
+              className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -377,13 +500,15 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
                 onClick={handleCloseView}
               ></motion.div>
 
-              <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-              
-              <motion.div 
+              <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
+                &#8203;
+              </span>
+
+              <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full pointer-events-auto relative z-10"
+                className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left shadow-xl transform transition-all sm:my-8 sm:align-middle w-full sm:max-w-lg max-w-[calc(100%-2rem)] pointer-events-auto relative z-10"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex justify-between items-start p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
@@ -399,7 +524,7 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
                     <X className="h-5 w-5" />
                   </button>
                 </div>
-                
+
                 <div className="max-h-[70vh] overflow-y-auto p-4 sm:p-6">
                   <dl className="space-y-4">
                     <div>
@@ -410,7 +535,7 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
                         {selectedSubmission.first_name} {selectedSubmission.last_name}
                       </p>
                     </div>
-                    
+
                     <div>
                       <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
                         Email
@@ -419,7 +544,7 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
                         {selectedSubmission.email}
                       </p>
                     </div>
-                    
+
                     <div>
                       <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
                         Phone
@@ -428,7 +553,7 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
                         {selectedSubmission.phone || "Not provided"}
                       </p>
                     </div>
-                    
+
                     <div>
                       <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
                         Class
@@ -437,7 +562,7 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
                         {selectedSubmission.class}
                       </p>
                     </div>
-                    
+
                     <div>
                       <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
                         Section
@@ -446,7 +571,7 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
                         {selectedSubmission.section}
                       </p>
                     </div>
-                    
+
                     <div>
                       <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
                         Roll Number
@@ -455,7 +580,7 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
                         {selectedSubmission.roll}
                       </p>
                     </div>
-                    
+
                     <div>
                       <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
                         Membership Type
@@ -464,7 +589,7 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
                         {selectedSubmission.membership_type}
                       </p>
                     </div>
-                    
+
                     <div>
                       <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
                         Transaction ID
@@ -473,7 +598,7 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
                         {selectedSubmission.transaction_id}
                       </p>
                     </div>
-                    
+
                     <div>
                       <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
                         Interests
@@ -489,7 +614,7 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
                         ))}
                       </div>
                     </div>
-                    
+
                     <div>
                       <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
                         Experience
@@ -498,7 +623,7 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
                         {selectedSubmission.experience || "No experience provided"}
                       </p>
                     </div>
-                    
+
                     <div>
                       <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
                         Motivation
@@ -507,17 +632,19 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
                         {selectedSubmission.motivation}
                       </p>
                     </div>
-                    
+
                     <div>
                       <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
                         Status
                       </div>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedSubmission.status)}`}>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedSubmission.status)}`}
+                      >
                         {getStatusIcon(selectedSubmission.status)}
                         {selectedSubmission.status}
                       </span>
                     </div>
-                    
+
                     <div>
                       <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
                         Submitted On
@@ -527,7 +654,7 @@ export default function JoinAdmin({ initialSubmissions }: JoinAdminProps) {
                       </p>
                     </div>
                   </dl>
-                  
+
                   <div className="mt-5 sm:mt-6 border-t border-gray-200 dark:border-gray-700 pt-5 sm:flex sm:flex-row-reverse">
                     <button
                       type="button"

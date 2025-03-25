@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase"
-import { Pencil, Trash2, Code, Plus, Check, X, AlertCircle, Search, Upload } from "lucide-react"
+import { Pencil, Trash2, Code, Plus, Check, X, AlertCircle, Search } from 'lucide-react'
 import { motion, AnimatePresence } from "framer-motion"
+import { Upload } from 'lucide-react'
 import { v4 as uuidv4 } from "uuid"
 
 interface Developer {
@@ -270,7 +271,7 @@ export default function DevelopersAdmin({ initialDevelopers = [] }: DevelopersAd
   }
 
   return (
-    <div>
+    <div className="w-full max-w-full px-4 sm:px-6 lg:px-8">
       <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">Developers</h2>
         
@@ -332,7 +333,7 @@ export default function DevelopersAdmin({ initialDevelopers = [] }: DevelopersAd
         )}
       </AnimatePresence>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden w-full">
         {loading && filteredDevelopers.length === 0 ? (
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -348,86 +349,162 @@ export default function DevelopersAdmin({ initialDevelopers = [] }: DevelopersAd
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-900">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</th>
-                  <th scope="col" className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Skills</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {filteredDevelopers.map((developer) => (
-                  <motion.tr 
-                    key={developer.id} 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors duration-150"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        {developer.image_url && (
-                          <div className="flex-shrink-0 h-10 w-10 mr-4">
-                            <img 
-                              className="h-10 w-10 rounded-full object-cover"
-                              src={developer.image_url}
-                              alt={developer.name}
-                            />
+          <div className="w-full overflow-hidden">
+            <div className="sm:overflow-x-auto -mx-4 sm:mx-0">
+              {/* Mobile card view */}
+              <div className="block sm:hidden">
+                <div className="space-y-3 px-4">
+                  {filteredDevelopers.map((developer) => (
+                    <motion.div
+                      key={developer.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border border-gray-200 dark:border-gray-700"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center">
+                          {developer.image_url && (
+                            <div className="flex-shrink-0 h-10 w-10 mr-3">
+                              <img 
+                                className="h-10 w-10 rounded-full object-cover"
+                                src={developer.image_url || "/placeholder.svg"}
+                                alt={developer.name}
+                              />
+                            </div>
+                          )}
+                          <div>
+                            <h3 className="font-medium text-gray-900 dark:text-white">{developer.name}</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{developer.role}</p>
                           </div>
-                        )}
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">{developer.name}</div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{developer.role}</div>
-                    </td>
-                    <td className="hidden md:table-cell px-6 py-4">
-                      <div className="flex flex-wrap gap-1">
-                        {developer.skills.slice(0, 3).map((skill) => (
-                          <span 
-                            key={skill} 
-                            className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
+                        </div>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => {
+                              setCurrentDeveloper(developer)
+                              setIsModalOpen(true)
+                            }}
+                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                            title="Edit developer"
                           >
-                            {skill}
-                          </span>
-                        ))}
-                        {developer.skills.length > 3 && (
-                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                            +{developer.skills.length - 3}
-                          </span>
-                        )}
+                            <Pencil className="h-4 w-4" />
+                            <span className="sr-only">Edit</span>
+                          </button>
+                          <button
+                            onClick={() => handleDelete(developer.id)}
+                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                            title="Delete developer"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Delete</span>
+                          </button>
+                        </div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-3">
-                        <button
-                          onClick={() => {
-                            setCurrentDeveloper(developer)
-                            setIsModalOpen(true)
-                          }}
-                          className="inline-flex items-center text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
-                          title="Edit developer"
-                        >
-                          <Pencil className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
-                        </button>
-                        <button
-                          onClick={() => handleDelete(developer.id)}
-                          className="inline-flex items-center text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors"
-                          title="Delete developer"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Delete</span>
-                        </button>
+                      <div className="mt-2">
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {developer.skills.slice(0, 3).map((skill) => (
+                            <span 
+                              key={skill} 
+                              className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                          {developer.skills.length > 3 && (
+                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                              +{developer.skills.length - 3}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Desktop table view */}
+              <div className="hidden sm:block">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-900">
+                    <tr>
+                      <th scope="col" className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
+                      <th scope="col" className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</th>
+                      <th scope="col" className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Skills</th>
+                      <th scope="col" className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {filteredDevelopers.map((developer) => (
+                      <motion.tr 
+                        key={developer.id} 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors duration-150"
+                      >
+                        <td className="px-3 sm:px-6 py-4">
+                          <div className="flex items-center">
+                            {developer.image_url && (
+                              <div className="flex-shrink-0 h-10 w-10 mr-4">
+                                <img 
+                                  className="h-10 w-10 rounded-full object-cover"
+                                  src={developer.image_url || "/placeholder.svg"}
+                                  alt={developer.name}
+                                />
+                              </div>
+                            )}
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">{developer.name}</div>
+                          </div>
+                        </td>
+                        <td className="px-3 sm:px-6 py-4">
+                          <div className="text-sm text-gray-500 dark:text-gray-400">{developer.role}</div>
+                        </td>
+                        <td className="hidden md:table-cell px-3 sm:px-6 py-4">
+                          <div className="flex flex-wrap gap-1">
+                            {developer.skills.slice(0, 3).map((skill) => (
+                              <span 
+                                key={skill} 
+                                className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
+                              >
+                                {skill}
+                              </span>
+                            ))}
+                            {developer.skills.length > 3 && (
+                              <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                +{developer.skills.length - 3}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-3 sm:px-6 py-4 text-sm font-medium">
+                          <div className="flex space-x-3">
+                            <button
+                              onClick={() => {
+                                setCurrentDeveloper(developer)
+                                setIsModalOpen(true)
+                              }}
+                              className="inline-flex items-center text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                              title="Edit developer"
+                            >
+                              <Pencil className="h-4 w-4" />
+                              <span className="sr-only">Edit</span>
+                            </button>
+                            <button
+                              onClick={() => handleDelete(developer.id)}
+                              className="inline-flex items-center text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                              title="Delete developer"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">Delete</span>
+                            </button>
+                          </div>
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -451,7 +528,7 @@ export default function DevelopersAdmin({ initialDevelopers = [] }: DevelopersAd
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full pointer-events-auto relative z-10"
+                className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left shadow-xl transform transition-all sm:my-8 sm:align-middle w-full sm:max-w-lg max-w-[calc(100%-2rem)] pointer-events-auto relative z-10"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex justify-between items-start p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
@@ -482,7 +559,7 @@ export default function DevelopersAdmin({ initialDevelopers = [] }: DevelopersAd
                           value={currentDeveloper.name || ""}
                           onChange={handleInputChange}
                           required
-                          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-4 py-2"
+                          className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2"
                         />
                       </div>
 
@@ -497,7 +574,7 @@ export default function DevelopersAdmin({ initialDevelopers = [] }: DevelopersAd
                           value={currentDeveloper.role || ""}
                           onChange={handleInputChange}
                           required
-                          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-4 py-2"
+                          className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2"
                         />
                       </div>
                     </div>
@@ -514,12 +591,12 @@ export default function DevelopersAdmin({ initialDevelopers = [] }: DevelopersAd
                           onChange={(e) => setSkillInput(e.target.value)}
                           onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddSkill())}
                           placeholder="Add skill and press Enter"
-                          className="flex-1 min-w-0 block w-full rounded-none rounded-l-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:border-primary focus:ring-primary sm:text-sm px-4 py-2"
+                          className="flex-1 min-w-0 block w-full rounded-none rounded-l-md border border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:border-primary focus:ring-primary sm:text-sm px-3 py-2"
                         />
                         <button
                           type="button"
                           onClick={handleAddSkill}
-                          className="inline-flex items-center px-4 py-2 border border-l-0 border-gray-300 dark:border-gray-700 text-sm font-medium rounded-r-md text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary px-4 py-2"
+                          className="inline-flex items-center px-4 py-2 border border-l-0 border-gray-300 dark:border-gray-700 text-sm font-medium rounded-r-md text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                         >
                           Add
                         </button>
@@ -548,7 +625,7 @@ export default function DevelopersAdmin({ initialDevelopers = [] }: DevelopersAd
                       <label htmlFor="image" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Profile Image
                       </label>
-                      <div className="mt-1 flex items-center space-x-4">
+                      <div className="mt-1 flex flex-col sm:flex-row items-start sm:items-center gap-4">
                         {(imageFile || currentDeveloper.image_url) && (
                           <div className="flex-shrink-0">
                             <img
@@ -567,7 +644,7 @@ export default function DevelopersAdmin({ initialDevelopers = [] }: DevelopersAd
                             name="image" 
                             accept="image/*" 
                             onChange={handleImageChange} 
-                            className="sr-only px-2 py-1" 
+                            className="sr-only" 
                           />
                         </label>
                       </div>
@@ -585,7 +662,7 @@ export default function DevelopersAdmin({ initialDevelopers = [] }: DevelopersAd
                           value={currentDeveloper.github_url || ""}
                           onChange={handleInputChange}
                           placeholder="eg: https://github.com/username"
-                          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-4 py-2"
+                          className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2"
                         />
                       </div>
 
@@ -600,7 +677,7 @@ export default function DevelopersAdmin({ initialDevelopers = [] }: DevelopersAd
                           value={currentDeveloper.linkedin_url || ""}
                           onChange={handleInputChange}
                           placeholder="eg: https://linkedin.com/in/username"
-                          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-4 py-2"
+                          className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2"
                         />
                       </div>
                     </div>
@@ -615,8 +692,8 @@ export default function DevelopersAdmin({ initialDevelopers = [] }: DevelopersAd
                         name="portfolio"
                         value={currentDeveloper.portfolio || ""}
                         onChange={handleInputChange}
-                        placeholder="eg:https://portfolio.com"
-                        className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-4 py-2"
+                        placeholder="eg: https://portfolio.com"
+                        className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2"
                       />
                     </div>
 
@@ -632,7 +709,7 @@ export default function DevelopersAdmin({ initialDevelopers = [] }: DevelopersAd
                           value={currentDeveloper.projects}
                           onChange={handleInputChange}
                           min="0"
-                          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-4 py-2"
+                          className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2"
                         />
                       </div>
                       
@@ -647,7 +724,7 @@ export default function DevelopersAdmin({ initialDevelopers = [] }: DevelopersAd
                           value={currentDeveloper.contributions}
                           onChange={handleInputChange}
                           min="0"
-                          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-4 py-2"
+                          className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2"
                         />
                       </div>
                     </div>
@@ -662,23 +739,22 @@ export default function DevelopersAdmin({ initialDevelopers = [] }: DevelopersAd
                         rows={3}
                         value={currentDeveloper.bio || ""}
                         onChange={handleInputChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-4 py-2"
+                        className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2"
                       ></textarea>
                     </div>
 
-                    <div className="border-t border-gray-200 dark:border-gray-700 pt-5 mt-5 sm:grid sm:grid-cols-2 sm:gap-3">
+                    <div className="border-t border-gray-200 dark:border-gray-700 pt-5 mt-5 flex flex-col-reverse sm:grid sm:grid-cols-2 sm:gap-3">
                       <button
                         type="button"
-                        className="inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:text-sm"
+                        className="mt-3 sm:mt-0 inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:text-sm"
                         onClick={handleCloseModal}
                       >
                         Cancel
                       </button>
                       <button
-                        type="button"
-                        onClick={handleSubmit}
+                        type="submit"
                         disabled={loading}
-                        className="mt-3 sm:mt-0 inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-medium text-white hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:text-sm px-4 py-2"
+                        className="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-medium text-white hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:text-sm"
                       >
                         {loading ? (
                           <>
@@ -703,5 +779,3 @@ export default function DevelopersAdmin({ initialDevelopers = [] }: DevelopersAd
     </div>
   )
 }
-
-
