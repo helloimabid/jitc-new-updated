@@ -1,5 +1,4 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr"
-// import { cookies } from "next/headers"
 import type { Database } from "@/types/supabase"
 import { cookies } from "next/headers"
 
@@ -22,7 +21,7 @@ export async function createClient() {
           cookieStore.delete({ name, ...options })
         },
       },
-    }
+    },
   )
 }
 
@@ -33,7 +32,6 @@ export async function getSession() {
     const { data } = await supabase.auth.getSession()
     return data.session
   } catch (error) {
-    // console.error("Error getting session:", error)
     return null
   }
 }
@@ -42,15 +40,11 @@ export async function getSession() {
 export async function getEvents() {
   const supabase = await createClient()
   try {
-    const { data, error } = await supabase
-      .from("events")
-      .select("*")
-      .order("date", { ascending: true })
+    const { data, error } = await supabase.from("events").select("*").order("date", { ascending: true })
 
     if (error) throw error
     return data || []
   } catch (error) {
-    // console.error("Error fetching events:", error)
     return []
   }
 }
@@ -61,12 +55,11 @@ export async function getExecutives() {
     const { data, error } = await supabase
       .from("executives")
       .select("*")
-      .order("created_at", { ascending: true })
+      .order("display_order", { ascending: true, nullsLast: true })
 
     if (error) throw error
     return data || []
   } catch (error) {
-    // console.error("Error fetching executives:", error)
     return []
   }
 }
@@ -74,15 +67,11 @@ export async function getExecutives() {
 export async function getModerators() {
   const supabase = await createClient()
   try {
-    const { data, error } = await supabase
-      .from("moderators")
-      .select("*")
-      .order("created_at", { ascending: true })
+    const { data, error } = await supabase.from("moderators").select("*").order("created_at", { ascending: true })
 
     if (error) throw error
     return data || []
   } catch (error) {
-    // console.error("Error fetching executives:", error)
     return []
   }
 }
@@ -90,15 +79,11 @@ export async function getModerators() {
 export async function getDevelopers() {
   const supabase = await createClient()
   try {
-    const { data, error } = await supabase
-      .from("developers")
-      .select("*")
-      .order("created_at", { ascending: true })
+    const { data, error } = await supabase.from("developers").select("*").order("created_at", { ascending: true })
 
     if (error) throw error
     return data || []
   } catch (error) {
-    // console.error("Error fetching developers:", error)
     return []
   }
 }
@@ -114,7 +99,6 @@ export async function getContactSubmissions() {
     if (error) throw error
     return data || []
   } catch (error) {
-    // console.error("Error fetching contact submissions:", error)
     return []
   }
 }
@@ -130,7 +114,6 @@ export async function getJoinSubmissions() {
     if (error) throw error
     return data || []
   } catch (error) {
-    // console.error("Error fetching join submissions:", error)
     return []
   }
 }
@@ -148,25 +131,16 @@ export async function getDashboardStats() {
       contactCount,
       joinCount,
       unreadContactCount,
-      pendingJoinCount
+      pendingJoinCount,
     ] = await Promise.all([
       supabase.from("events").select("id", { count: "exact", head: true }),
       supabase.from("executives").select("id", { count: "exact", head: true }),
       supabase.from("developers").select("id", { count: "exact", head: true }),
       supabase.from("contact_submissions").select("id", { count: "exact", head: true }),
       supabase.from("join_submissions").select("id", { count: "exact", head: true }),
-      supabase
-        .from("contact_submissions")
-        .select("id", { count: "exact", head: true })
-        .eq("is_read", false),
-      supabase
-        .from("join_submissions")
-        .select("id", { count: "exact", head: true })
-        .eq("is_approved", false),
-      supabase
-        .from("join_submissions")
-        .select("id", { count: "exact", head: true })
-        .eq("is_approved", false)
+      supabase.from("contact_submissions").select("id", { count: "exact", head: true }).eq("is_read", false),
+      supabase.from("join_submissions").select("id", { count: "exact", head: true }).eq("is_approved", false),
+      supabase.from("join_submissions").select("id", { count: "exact", head: true }).eq("is_approved", false),
     ])
 
     return {
@@ -176,10 +150,8 @@ export async function getDashboardStats() {
       developers: developersCount.count || 0,
       contactSubmissions: contactCount.count || 0,
       joinSubmissions: joinCount.count || 0,
-      
     }
   } catch (error) {
-    // console.error("Error fetching dashboard stats:", error)
     return {
       events: 0,
       executives: 0,
@@ -188,141 +160,8 @@ export async function getDashboardStats() {
       contactSubmissions: 0,
       joinSubmissions: 0,
       unreadContactSubmissions: 0,
-      pendingJoinSubmissions: 0
+      pendingJoinSubmissions: 0,
     }
   }
 }
 
-// Data mutation functions
-export async function createEvent(eventData: any) {
-  const supabase = await createClient()
-  try {
-    const { data, error } = await supabase
-      .from("events")
-      .insert([eventData])
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
-  } catch (error) {
-    // console.error("Error creating event:", error)
-    throw error
-  }
-}
-
-export async function updateEvent(id: string, eventData: any) {
-  const supabase = await createClient()
-  try {
-    const { data, error } = await supabase
-      .from("events")
-      .update(eventData)
-      .eq("id", id)
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
-  } catch (error) {
-    // console.error("Error updating event:", error)
-    throw error
-  }
-}
-
-export async function deleteEvent(id: string) {
-  const supabase = await createClient()
-  try {
-    const { error } = await supabase
-      .from("events")
-      .delete()
-      .eq("id", id)
-
-    if (error) throw error
-  } catch (error) {
-    // console.error("Error deleting event:", error)
-    throw error
-  }
-}
-
-// Similar mutation functions for other tables
-export async function createExecutive(executiveData: any) {
-  const supabase = await createClient()
-  try {
-    const { data, error } = await supabase
-      .from("executives")
-      .insert([executiveData])
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
-  } catch (error) {
-    // console.error("Error creating executive:", error)
-    throw error
-  }
-}
-
-export async function updateExecutive(id: string, executiveData: any) {
-  const supabase = await createClient()
-  try {
-    const { data, error } = await supabase
-      .from("executives")
-      .update(executiveData)
-      .eq("id", id)
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
-  } catch (error) {
-    // console.error("Error updating executive:", error)
-    throw error
-  }
-}
-
-export async function deleteExecutive(id: string) {
-  const supabase = await createClient()
-  try {
-    const { error } = await supabase
-      .from("executives")
-      .delete()
-      .eq("id", id)
-
-    if (error) throw error
-  } catch (error) {
-    // console.error("Error deleting executive:", error)
-    throw error
-  }
-}
-
-// Contact submission functions
-export async function markContactAsRead(id: string) {
-  const supabase = await createClient()
-  try {
-    const { error } = await supabase
-      .from("contact_submissions")
-      .update({ is_read: true })
-      .eq("id", id)
-
-    if (error) throw error
-  } catch (error) {
-    // console.error("Error marking contact as read:", error)  
-    throw error
-  }
-}
-
-// Join submission functions
-export async function approveJoinSubmission(id: string) {
-  const supabase = await createClient()
-  try {
-    const { error } = await supabase
-      .from("join_submissions")
-      .update({ is_approved: true })
-      .eq("id", id)
-
-    if (error) throw error
-  } catch (error) {
-    // console.error("Error approving join submission:", error)
-    throw error
-  }
-} 
