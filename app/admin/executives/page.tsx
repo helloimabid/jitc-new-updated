@@ -1,3 +1,4 @@
+
 import { Suspense } from "react"
 import { Button } from "@/components/ui/button"
 import { PlusCircle } from "lucide-react"
@@ -9,7 +10,7 @@ title: "Manage Executives | Admin Dashboard",
 
 export default function ExecutivesPage() {
 return (
-<div className="container mx-auto py-6 space-y-6">
+<div className="space-y-6">
 <div className="flex justify-between items-center">
 <div>
 <h1 className="text-2xl font-bold tracking-tight">Executives</h1>
@@ -27,3 +28,4 @@ Add Executive
 </div>
 )
 }
+
