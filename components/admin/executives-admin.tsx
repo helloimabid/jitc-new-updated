@@ -1,24 +1,10 @@
-
-    "use client"
+"use client"
 
 import type React from "react"
 
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
-import {
-  Plus,
-  Check,
-  X,
-  AlertCircle,
-  Upload,
-  Search,
-  User,
-  ArrowUp,
-  ArrowDown,
-  MoveVertical,
-  Pencil,
-  Trash2,
-} from "lucide-react"
+import { Plus, Check, X, AlertCircle, Upload, Search, User, ArrowUp, ArrowDown, MoveVertical } from "lucide-react"
 import { v4 as uuidv4 } from "uuid"
 import { motion, AnimatePresence } from "framer-motion"
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
@@ -385,22 +371,17 @@ export default function ExecutivesAdmin({ initialExecutives }: ExecutivesAdminPr
     try {
       setLoading(true)
 
-      // Create a copy of the executives array
+      // Reorder the executives array
       const items = Array.from(executives)
-
-      // Remove the dragged item from its original position
       const [reorderedItem] = items.splice(result.source.index, 1)
-
-      // Insert the dragged item at its new position
       items.splice(result.destination.index, 0, reorderedItem)
 
-      // Create a new array with updated display_order values
+      // Update display_order for all executives
       const updatedItems = items.map((item, index) => ({
         ...item,
         display_order: index + 1,
       }))
 
-      // Update the state with the new order
       setExecutives(updatedItems)
 
       // Update filtered executives if needed
@@ -417,21 +398,15 @@ export default function ExecutivesAdmin({ initialExecutives }: ExecutivesAdminPr
         setFilteredExecutives(updatedItems)
       }
 
-      // Save the new order to the database using the API endpoint
-      // This is more reliable for bulk updates than individual Supabase calls
-      const response = await fetch("/api/reorder-executives", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          executiveIds: updatedItems.map((item) => item.id),
-        }),
-      })
+      // Save the new order to the database
+      const supabase = createClient()
 
-      if (!response.ok) {
-        throw new Error("Failed to update order in database")
-      }
+      // Update each executive with its new order
+      const updatePromises = updatedItems.map((item) =>
+        supabase.from("executives").update({ display_order: item.display_order }).eq("id", item.id),
+      )
+
+      await Promise.all(updatePromises)
 
       setSuccessMessage("Order updated successfully!")
       setTimeout(() => setSuccessMessage(null), 3000)
@@ -536,8 +511,8 @@ export default function ExecutivesAdmin({ initialExecutives }: ExecutivesAdminPr
           <div className="flex items-center">
             <MoveVertical className="h-5 w-5 mr-2" />
             <span>
-              <strong>Reorder Mode:</strong> Drag and drop executives to change their order, or use the up/down arrows.
-              Changes are saved automatically.
+              <strong>Reorder Mode:</strong> Use the up/down arrows to change the order of executives. Changes are saved
+              automatically.
             </span>
           </div>
         </div>
@@ -563,132 +538,76 @@ export default function ExecutivesAdmin({ initialExecutives }: ExecutivesAdminPr
             <div className="sm:overflow-x-auto -mx-4 sm:mx-0">
               {/* Mobile card view */}
               <div className="block sm:hidden">
-                {isReorderMode ? (
-                  <DragDropContext onDragStart={() => setIsDragging(true)} onDragEnd={handleDragEnd}>
-                    <Droppable droppableId="executives-mobile">
-                      {(provided) => (
-                        <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3 px-4">
-                          {filteredExecutives.map((executive, index) => (
-                            <Draggable key={executive.id} draggableId={executive.id} index={index}>
-                              {(provided, snapshot) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  className={`bg-white dark:bg-gray-800 p-4 rounded-lg shadow border ${
-                                    snapshot.isDragging
-                                      ? "border-primary ring-2 ring-primary"
-                                      : "border-gray-200 dark:border-gray-700"
-                                  }`}
-                                >
-                                  <div className="flex items-start justify-between">
-                                    <div className="flex items-center">
-                                      <div className="mr-3 text-gray-400">
-                                        <MoveVertical className="h-5 w-5" />
-                                      </div>
-                                      {executive.image_url && (
-                                        <div className="flex-shrink-0 h-10 w-10 mr-3">
-                                          <img
-                                            src={executive.image_url || "/placeholder.svg"}
-                                            alt={executive.name}
-                                            className="h-10 w-10 rounded-full object-cover"
-                                          />
-                                        </div>
-                                      )}
-                                      <div>
-                                        <h3 className="font-medium text-gray-900 dark:text-white">{executive.name}</h3>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">{executive.position}</p>
-                                      </div>
+                <DragDropContext onDragStart={() => setIsDragging(true)} onDragEnd={handleDragEnd}>
+                  <Droppable droppableId="executives-mobile">
+                    {(provided) => (
+                      <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3 px-4">
+                        {filteredExecutives.map((executive, index) => (
+                          <Draggable key={executive.id} draggableId={executive.id} index={index}>
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className={`bg-white dark:bg-gray-800 p-4 rounded-lg shadow border ${
+                                  snapshot.isDragging
+                                    ? "border-primary ring-2 ring-primary"
+                                    : "border-gray-200 dark:border-gray-700"
+                                }`}
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex items-center">
+                                    <div className="mr-3 text-gray-400">
+                                      <MoveVertical className="h-5 w-5" />
                                     </div>
-                                    <div className="flex flex-col space-y-1">
-                                      <button
-                                        onClick={() => handleMoveUp(index)}
-                                        disabled={index === 0}
-                                        className={`text-gray-600 dark:text-gray-400 ${
-                                          index === 0 ? "opacity-30 cursor-not-allowed" : "hover:text-primary"
-                                        }`}
-                                        title="Move up"
-                                      >
-                                        <ArrowUp className="h-4 w-4" />
-                                      </button>
-                                      <button
-                                        onClick={() => handleMoveDown(index)}
-                                        disabled={index === filteredExecutives.length - 1}
-                                        className={`text-gray-600 dark:text-gray-400 ${
-                                          index === filteredExecutives.length - 1
-                                            ? "opacity-30 cursor-not-allowed"
-                                            : "hover:text-primary"
-                                        }`}
-                                        title="Move down"
-                                      >
-                                        <ArrowDown className="h-4 w-4" />
-                                      </button>
+                                    {executive.image_url && (
+                                      <div className="flex-shrink-0 h-10 w-10 mr-3">
+                                        <img
+                                          src={executive.image_url || "/placeholder.svg"}
+                                          alt={executive.name}
+                                          className="h-10 w-10 rounded-full object-cover"
+                                        />
+                                      </div>
+                                    )}
+                                    <div>
+                                      <h3 className="font-medium text-gray-900 dark:text-white">{executive.name}</h3>
+                                      <p className="text-sm text-gray-500 dark:text-gray-400">{executive.position}</p>
                                     </div>
                                   </div>
+                                  <div className="flex flex-col space-y-1">
+                                    <button
+                                      onClick={() => handleMoveUp(index)}
+                                      disabled={index === 0}
+                                      className={`text-gray-600 dark:text-gray-400 ${
+                                        index === 0 ? "opacity-30 cursor-not-allowed" : "hover:text-primary"
+                                      }`}
+                                      title="Move up"
+                                    >
+                                      <ArrowUp className="h-4 w-4" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleMoveDown(index)}
+                                      disabled={index === filteredExecutives.length - 1}
+                                      className={`text-gray-600 dark:text-gray-400 ${
+                                        index === filteredExecutives.length - 1
+                                          ? "opacity-30 cursor-not-allowed"
+                                          : "hover:text-primary"
+                                      }`}
+                                      title="Move down"
+                                    >
+                                      <ArrowDown className="h-4 w-4" />
+                                    </button>
+                                  </div>
                                 </div>
-                              )}
-                            </Draggable>
-                          ))}
-                          {provided.placeholder}
-                        </div>
-                      )}
-                    </Droppable>
-                  </DragDropContext>
-                ) : (
-                  <div className="space-y-3 px-4">
-                    {filteredExecutives.map((executive) => (
-                      <motion.div
-                        key={executive.id}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border border-gray-200 dark:border-gray-700"
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center">
-                            {executive.image_url && (
-                              <div className="flex-shrink-0 h-10 w-10 mr-3">
-                                <img
-                                  src={executive.image_url || "/placeholder.svg"}
-                                  alt={executive.name}
-                                  className="h-10 w-10 rounded-full object-cover"
-                                />
                               </div>
                             )}
-                            <div>
-                              <h3 className="font-medium text-gray-900 dark:text-white">{executive.name}</h3>
-                              <p className="text-sm text-gray-500 dark:text-gray-400">{executive.position}</p>
-                            </div>
-                          </div>
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => {
-                                setCurrentExecutive(executive)
-                                setIsModalOpen(true)
-                              }}
-                              className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
-                              title="Edit executive"
-                            >
-                              <Pencil className="h-4 w-4" />
-                              <span className="sr-only">Edit</span>
-                            </button>
-                            <button
-                              onClick={() => handleDelete(executive.id)}
-                              className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors"
-                              title="Delete executive"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">Delete</span>
-                            </button>
-                          </div>
-                        </div>
-                        <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                          <p className="truncate">{executive.email}</p>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
               </div>
 
               {/* Desktop table view */}
