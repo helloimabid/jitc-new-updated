@@ -64,7 +64,7 @@ export default function ExecutivesContent() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="glass rounded-lg overflow-hidden group hover:transform hover:scale-[1.02] transition-all duration-300"
               >
-                <div className="relative aspect-[9/10] w-full overflow-hidden">
+                <div className="relative aspect-[6/7] w-full overflow-hidden">
                   <Image
                     src={executive.image_url || "/placeholder.svg?height=400&width=400"}
                     alt={executive.name}
