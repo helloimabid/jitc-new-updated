@@ -5,7 +5,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
 import { Trash2, GripVertical, Pencil } from "lucide-react"
 import Image from "next/image"
 import { toast } from "sonner"
-import { createClientSupabaseClient } from "@/lib/supabase/supabase-client"
+import { createClientSupabaseClient } from "@/lib/supabase-client"
 import type { Database } from "@/types/supabase"
 
 type Executive = Database["public"]["Tables"]["executives"]["Row"]
