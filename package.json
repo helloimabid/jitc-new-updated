@@ -11,6 +11,9 @@
   "dependencies": {
     "react-beautiful-dnd": "^13.1.1",
     "sonner": "^1.0.3",
+    "framer-motion": "^10.16.4",
+    "react-beautiful-dnd": "^13.1.1",
+    "sonner": "^1.0.3",
     "@emotion/is-prop-valid": "latest",
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-accordion": "^1.2.2",
