@@ -12,6 +12,7 @@ type Executive = Database["public"]["Tables"]["executives"]["Row"]
 export default function ExecutivesContent() {
   const [executives, setExecutives] = useState<Executive[]>([])
   const [loading, setLoading] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     const fetchExecutives = async () => {
@@ -27,6 +28,15 @@ export default function ExecutivesContent() {
     }
 
     fetchExecutives()
+
+    // Check screen size for responsive icon sizing
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
   return (
@@ -87,7 +97,7 @@ export default function ExecutivesContent() {
                         className="text-gray-400 hover:text-primary transition-colors"
                         title="GitHub"
                       >
-                        <Facebook size={16} sm:size={18} />
+                        <Facebook size={isMobile ? 16 : 18} />
                       </a>
                     )}
                     {executive.linkedin_url && (
@@ -98,7 +108,7 @@ export default function ExecutivesContent() {
                         className="text-gray-400 hover:text-primary transition-colors"
                         title="LinkedIn"
                       >
-                        <Instagram size={16} sm:size={18} />
+                        <Instagram size={isMobile ? 16 : 18} />
                       </a>
                     )}
                     <a
@@ -106,7 +116,7 @@ export default function ExecutivesContent() {
                       className="text-gray-400 hover:text-primary transition-colors"
                       title="Email"
                     >
-                      <Mail size={16} sm:size={18} />
+                      <Mail size={isMobile ? 16 : 18} />
                     </a>
                   </div>
                 </div>
