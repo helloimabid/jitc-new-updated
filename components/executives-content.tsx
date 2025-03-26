@@ -30,21 +30,18 @@ export default function ExecutivesContent() {
   }, [])
 
   return (
-    <section className="relative pt-20 pb-16">
-      <div
-        className="container mx-auto px-4 py-16 md:
- py-24"
-      >
+    <section className="relative pt-10 pb-10 sm:pt-16 sm:pb-16">
+      <div className="container mx-auto px-4 py-8 sm:py-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-16"
+          className="text-center mb-10 sm:mb-16"
         >
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
             Our <span className="text-primary">Executive</span> Team
           </h1>
-          <p className="text-gray-400 max-w-2xl mx-auto">
+          <p className="text-gray-400 max-w-2xl mx-auto text-sm sm:text-base">
             Meet the dedicated team of students leading the Josephite IT Club and driving our mission forward.
           </p>
         </motion.div>
@@ -55,14 +52,14 @@ export default function ExecutivesContent() {
             <p className="mt-4 text-gray-400">Loading executives...</p>
           </div>
         ) : (
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {executives.map((executive, index) => (
               <motion.div
                 key={executive.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="glass rounded-lg overflow-hidden group hover:transform hover:scale-[1.02] transition-all duration-300"
+                className="glass rounded-lg overflow-hidden group hover:transform hover:scale-[1.02] transition-all duration-300 w-full"
               >
                 <div className="relative aspect-[6/7] w-full overflow-hidden">
                   <Image
@@ -72,14 +69,14 @@ export default function ExecutivesContent() {
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60"></div>
-                  <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <h3 className="text-xl font-bold text-white">{executive.name}</h3>
-                    <p className="text-primary">{executive.position}</p>
+                  <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
+                    <h3 className="text-lg sm:text-xl font-bold text-white">{executive.name}</h3>
+                    <p className="text-primary text-sm sm:text-base">{executive.position}</p>
                   </div>
                 </div>
 
-                <div className="p-6">
-                  <p className="text-gray-400 text-sm mb-4">{executive.bio}</p>
+                <div className="p-4 sm:p-6">
+                  <p className="text-gray-400 text-xs sm:text-sm mb-4">{executive.bio}</p>
 
                   <div className="flex space-x-4">
                     {executive.github_url && (
@@ -90,7 +87,7 @@ export default function ExecutivesContent() {
                         className="text-gray-400 hover:text-primary transition-colors"
                         title="GitHub"
                       >
-                        <Facebook size={18} />
+                        <Facebook size={16} sm:size={18} />
                       </a>
                     )}
                     {executive.linkedin_url && (
@@ -100,9 +97,8 @@ export default function ExecutivesContent() {
                         rel="noopener noreferrer"
                         className="text-gray-400 hover:text-primary transition-colors"
                         title="LinkedIn"
-
                       >
-                        <Instagram size={18} />
+                        <Instagram size={16} sm:size={18} />
                       </a>
                     )}
                     <a
@@ -110,7 +106,7 @@ export default function ExecutivesContent() {
                       className="text-gray-400 hover:text-primary transition-colors"
                       title="Email"
                     >
-                      <Mail size={18} />
+                      <Mail size={16} sm:size={18} />
                     </a>
                   </div>
                 </div>
@@ -118,10 +114,7 @@ export default function ExecutivesContent() {
             ))}
           </div>
         )}
-
-        
       </div>
     </section>
   )
 }
-
