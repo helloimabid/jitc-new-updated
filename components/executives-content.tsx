@@ -18,7 +18,11 @@ export default function ExecutivesContent() {
     const fetchExecutives = async () => {
       const supabase = createClient()
 
-      const { data, error } = await supabase.from("executives").select("*").order("created_at", { ascending: false })
+      // Changed to order by display_order instead of created_at
+      const { data, error } = await supabase
+        .from("executives")
+        .select("*")
+        .order("display_order", { ascending: true, nullsLast: true })
 
       if (data) {
         setExecutives(data)
@@ -33,10 +37,10 @@ export default function ExecutivesContent() {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 640)
     }
-    
+
     checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
   }, [])
 
   return (
@@ -128,3 +132,4 @@ export default function ExecutivesContent() {
     </section>
   )
 }
+
