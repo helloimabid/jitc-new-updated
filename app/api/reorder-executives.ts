@@ -23,6 +23,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
+    console.error("Error in reorder-executives:", error)
     return NextResponse.json({ error: "An unexpected error occurred" }, { status: 500 })
   }
 }
