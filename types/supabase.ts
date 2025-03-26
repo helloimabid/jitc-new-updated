@@ -13,7 +13,6 @@ export interface Database {
           image_url: string | null
           created_at: string | null
           updated_at: string | null
-          // Add registration_link to match your code
           registration_link: string | null
           event_type: string | null
           details_link: string | null
@@ -57,6 +56,7 @@ export interface Database {
           linkedin_url: string | null
           created_at: string | null
           updated_at: string | null
+          display_order: number | null
         }
         Insert: {
           id?: string
@@ -69,6 +69,7 @@ export interface Database {
           linkedin_url?: string | null
           created_at?: string | null
           updated_at?: string | null
+          display_order?: number | null
         }
         Update: {
           id?: string
@@ -81,6 +82,7 @@ export interface Database {
           linkedin_url?: string | null
           created_at?: string | null
           updated_at?: string | null
+          display_order?: number | null
         }
       }
       moderators: {
