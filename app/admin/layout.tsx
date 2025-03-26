@@ -6,7 +6,7 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
-import AdminSidebar from "./admin-sidebar"
+import AdminSidebar from "./components/admin/admin-sidebar"
 import { Loader2 } from "lucide-react"
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js"
 
