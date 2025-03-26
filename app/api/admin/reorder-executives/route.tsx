@@ -1,3 +1,4 @@
+
 import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
 
@@ -39,3 +40,4 @@ console.error("Error in reorder-executives:", error)
 return NextResponse.json({ error: "An unexpected error occurred", details: error }, { status: 500 })
 }
 }
+
