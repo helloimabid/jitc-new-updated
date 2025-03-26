@@ -3,8 +3,10 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { createClient } from "@/lib/supabase"
 import {
+  Pencil,
+  Trash2,
   Plus,
   Check,
   X,
@@ -15,8 +17,6 @@ import {
   ArrowUp,
   ArrowDown,
   MoveVertical,
-  Pencil,
-  Trash2,
 } from "lucide-react"
 import { v4 as uuidv4 } from "uuid"
 import { motion, AnimatePresence } from "framer-motion"
@@ -61,6 +61,7 @@ export default function ExecutivesAdmin({ initialExecutives }: ExecutivesAdminPr
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
+  const [isDragging, setIsDragging] = useState(false)
   const [currentExecutive, setCurrentExecutive] = useState<Executive>({
     id: "",
     name: "",
@@ -76,7 +77,6 @@ export default function ExecutivesAdmin({ initialExecutives }: ExecutivesAdminPr
   })
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [isReorderMode, setIsReorderMode] = useState(false)
-  const [isDragging, setIsDragging] = useState(false)
 
   useEffect(() => {
     const filtered = executives.filter(
@@ -327,51 +327,6 @@ export default function ExecutivesAdmin({ initialExecutives }: ExecutivesAdminPr
     }
   }
 
-  const updateAllOrders = async () => {
-    try {
-      setLoading(true)
-
-      // Update display_order for all executives
-      const updatedItems = executives.map((item, index) => ({
-        ...item,
-        display_order: index + 1,
-      }))
-
-      // Update in database
-      const supabase = createClient()
-      const updatePromises = updatedItems.map((exec) =>
-        supabase.from("executives").update({ display_order: exec.display_order }).eq("id", exec.id),
-      )
-
-      await Promise.all(updatePromises)
-
-      setExecutives(updatedItems)
-      setFilteredExecutives(
-        updatedItems.filter(
-          (executive) =>
-            executive.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            executive.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            executive.email.toLowerCase().includes(searchTerm.toLowerCase()),
-        ),
-      )
-
-      setSuccessMessage("Order updated successfully!")
-      setTimeout(() => setSuccessMessage(null), 3000)
-    } catch (err: any) {
-      setError(err.message || "Failed to update order")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const toggleReorderMode = () => {
-    setIsReorderMode(!isReorderMode)
-    // Clear search when entering reorder mode
-    if (!isReorderMode) {
-      setSearchTerm("")
-    }
-  }
-
   const handleDragEnd = async (result: any) => {
     setIsDragging(false)
 
@@ -384,22 +339,17 @@ export default function ExecutivesAdmin({ initialExecutives }: ExecutivesAdminPr
     try {
       setLoading(true)
 
-      // Create a copy of the executives array
+      // Reorder the executives array
       const items = Array.from(executives)
-
-      // Remove the dragged item from its original position
       const [reorderedItem] = items.splice(result.source.index, 1)
-
-      // Insert the dragged item at its new position
       items.splice(result.destination.index, 0, reorderedItem)
 
-      // Create a new array with updated display_order values
+      // Update display_order for all executives
       const updatedItems = items.map((item, index) => ({
         ...item,
         display_order: index + 1,
       }))
 
-      // Update the state with the new order
       setExecutives(updatedItems)
 
       // Update filtered executives if needed
@@ -416,8 +366,7 @@ export default function ExecutivesAdmin({ initialExecutives }: ExecutivesAdminPr
         setFilteredExecutives(updatedItems)
       }
 
-      // Save the new order to the database using the API endpoint
-      // This is more reliable for bulk updates than individual Supabase calls
+      // Save the new order to the database
       const response = await fetch("/api/reorder-executives", {
         method: "POST",
         headers: {
@@ -441,6 +390,14 @@ export default function ExecutivesAdmin({ initialExecutives }: ExecutivesAdminPr
       setFilteredExecutives([...filteredExecutives])
     } finally {
       setLoading(false)
+    }
+  }
+
+  const toggleReorderMode = () => {
+    setIsReorderMode(!isReorderMode)
+    // Clear search when entering reorder mode
+    if (!isReorderMode) {
+      setSearchTerm("")
     }
   }
 
@@ -692,125 +649,215 @@ export default function ExecutivesAdmin({ initialExecutives }: ExecutivesAdminPr
 
               {/* Desktop table view */}
               <div className="hidden sm:block">
-                <DragDropContext onDragStart={() => setIsDragging(true)} onDragEnd={handleDragEnd}>
-                  <Droppable droppableId="executives-desktop">
-                    {(provided) => (
-                      <table
-                        className="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
-                        {...provided.droppableProps}
-                        ref={provided.innerRef}
-                      >
-                        <thead className="bg-gray-50 dark:bg-gray-900">
-                          <tr>
-                            <th
-                              scope="col"
-                              className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-10"
-                            >
-                              #
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                            >
-                              Name
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                            >
-                              Position
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                            >
-                              Email
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                            >
-                              Actions
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                          {filteredExecutives.map((executive, index) => (
-                            <Draggable key={executive.id} draggableId={executive.id} index={index}>
-                              {(provided, snapshot) => (
-                                <tr
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  className={`${
-                                    snapshot.isDragging
-                                      ? "bg-blue-50 dark:bg-blue-900/20"
-                                      : "hover:bg-gray-50 dark:hover:bg-gray-700/30"
-                                  } transition-colors duration-150`}
-                                >
-                                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap" {...provided.dragHandleProps}>
-                                    <div className="flex items-center justify-center text-gray-500 dark:text-gray-400">
-                                      <MoveVertical className="h-5 w-5" />
-                                      <span className="ml-2 text-sm">{index + 1}</span>
-                                    </div>
-                                  </td>
-                                  <td className="px-3 sm:px-6 py-4">
-                                    <div className="flex items-center">
-                                      {executive.image_url && (
-                                        <div className="flex-shrink-0 h-10 w-10 mr-3">
-                                          <img
-                                            src={executive.image_url || "/placeholder.svg"}
-                                            alt={executive.name}
-                                            className="h-10 w-10 rounded-full object-cover"
-                                          />
-                                        </div>
-                                      )}
-                                      <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                        {executive.name}
+                {isReorderMode ? (
+                  <DragDropContext onDragStart={() => setIsDragging(true)} onDragEnd={handleDragEnd}>
+                    <Droppable droppableId="executives-desktop">
+                      {(provided) => (
+                        <table
+                          className="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
+                          {...provided.droppableProps}
+                          ref={provided.innerRef}
+                        >
+                          <thead className="bg-gray-50 dark:bg-gray-900">
+                            <tr>
+                              <th
+                                scope="col"
+                                className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-10"
+                              >
+                                #
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                              >
+                                Name
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                              >
+                                Position
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                              >
+                                Email
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                              >
+                                Actions
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            {filteredExecutives.map((executive, index) => (
+                              <Draggable key={executive.id} draggableId={executive.id} index={index}>
+                                {(provided, snapshot) => (
+                                  <tr
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    className={`${
+                                      snapshot.isDragging
+                                        ? "bg-blue-50 dark:bg-blue-900/20"
+                                        : "hover:bg-gray-50 dark:hover:bg-gray-700/30"
+                                    } transition-colors duration-150`}
+                                  >
+                                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap" {...provided.dragHandleProps}>
+                                      <div className="flex items-center justify-center text-gray-500 dark:text-gray-400">
+                                        <MoveVertical className="h-5 w-5" />
+                                        <span className="ml-2 text-sm">{index + 1}</span>
                                       </div>
-                                    </div>
-                                  </td>
-                                  <td className="px-3 sm:px-6 py-4">
-                                    <div className="text-sm text-gray-500 dark:text-gray-400">{executive.position}</div>
-                                  </td>
-                                  <td className="px-3 sm:px-6 py-4">
-                                    <div className="text-sm text-gray-500 dark:text-gray-400">{executive.email}</div>
-                                  </td>
-                                  <td className="px-3 sm:px-6 py-4 text-sm font-medium">
-                                    <div className="flex space-x-3">
-                                      <button
-                                        onClick={() => handleMoveUp(index)}
-                                        disabled={index === 0}
-                                        className={`text-gray-600 dark:text-gray-400 ${
-                                          index === 0 ? "opacity-30 cursor-not-allowed" : "hover:text-primary"
-                                        }`}
-                                        title="Move up"
-                                      >
-                                        <ArrowUp className="h-4 w-4" />
-                                      </button>
-                                      <button
-                                        onClick={() => handleMoveDown(index)}
-                                        disabled={index === filteredExecutives.length - 1}
-                                        className={`text-gray-600 dark:text-gray-400 ${
-                                          index === filteredExecutives.length - 1
-                                            ? "opacity-30 cursor-not-allowed"
-                                            : "hover:text-primary"
-                                        }`}
-                                        title="Move down"
-                                      >
-                                        <ArrowDown className="h-4 w-4" />
-                                      </button>
-                                    </div>
-                                  </td>
-                                </tr>
+                                    </td>
+                                    <td className="px-3 sm:px-6 py-4">
+                                      <div className="flex items-center">
+                                        {executive.image_url && (
+                                          <div className="flex-shrink-0 h-10 w-10 mr-3">
+                                            <img
+                                              src={executive.image_url || "/placeholder.svg"}
+                                              alt={executive.name}
+                                              className="h-10 w-10 rounded-full object-cover"
+                                            />
+                                          </div>
+                                        )}
+                                        <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                          {executive.name}
+                                        </div>
+                                      </div>
+                                    </td>
+                                    <td className="px-3 sm:px-6 py-4">
+                                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                                        {executive.position}
+                                      </div>
+                                    </td>
+                                    <td className="px-3 sm:px-6 py-4">
+                                      <div className="text-sm text-gray-500 dark:text-gray-400">{executive.email}</div>
+                                    </td>
+                                    <td className="px-3 sm:px-6 py-4 text-sm font-medium">
+                                      <div className="flex space-x-3">
+                                        <button
+                                          onClick={() => handleMoveUp(index)}
+                                          disabled={index === 0}
+                                          className={`text-gray-600 dark:text-gray-400 ${
+                                            index === 0 ? "opacity-30 cursor-not-allowed" : "hover:text-primary"
+                                          }`}
+                                          title="Move up"
+                                        >
+                                          <ArrowUp className="h-4 w-4" />
+                                        </button>
+                                        <button
+                                          onClick={() => handleMoveDown(index)}
+                                          disabled={index === filteredExecutives.length - 1}
+                                          className={`text-gray-600 dark:text-gray-400 ${
+                                            index === filteredExecutives.length - 1
+                                              ? "opacity-30 cursor-not-allowed"
+                                              : "hover:text-primary"
+                                          }`}
+                                          title="Move down"
+                                        >
+                                          <ArrowDown className="h-4 w-4" />
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                )}
+                              </Draggable>
+                            ))}
+                            {provided.placeholder}
+                          </tbody>
+                        </table>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
+                ) : (
+                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead className="bg-gray-50 dark:bg-gray-900">
+                      <tr>
+                        <th
+                          scope="col"
+                          className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                        >
+                          Name
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                        >
+                          Position
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                        >
+                          Email
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                        >
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                      {filteredExecutives.map((executive) => (
+                        <motion.tr
+                          key={executive.id}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors duration-150"
+                        >
+                          <td className="px-3 sm:px-6 py-4">
+                            <div className="flex items-center">
+                              {executive.image_url && (
+                                <div className="flex-shrink-0 h-10 w-10 mr-3">
+                                  <img
+                                    src={executive.image_url || "/placeholder.svg"}
+                                    alt={executive.name}
+                                    className="h-10 w-10 rounded-full object-cover"
+                                  />
+                                </div>
                               )}
-                            </Draggable>
-                          ))}
-                          {provided.placeholder}
-                        </tbody>
-                      </table>
-                    )}
-                  </Droppable>
-                </DragDropContext>
+                              <div className="text-sm font-medium text-gray-900 dark:text-white">{executive.name}</div>
+                            </div>
+                          </td>
+                          <td className="px-3 sm:px-6 py-4">
+                            <div className="text-sm text-gray-500 dark:text-gray-400">{executive.position}</div>
+                          </td>
+                          <td className="px-3 sm:px-6 py-4">
+                            <div className="text-sm text-gray-500 dark:text-gray-400">{executive.email}</div>
+                          </td>
+                          <td className="px-3 sm:px-6 py-4 text-sm font-medium">
+                            <div className="flex space-x-3">
+                              <button
+                                onClick={() => {
+                                  setCurrentExecutive(executive)
+                                  setIsModalOpen(true)
+                                }}
+                                className="inline-flex items-center text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                                title="Edit executive"
+                              >
+                                <Pencil className="h-4 w-4" />
+                                <span className="sr-only">Edit</span>
+                              </button>
+                              <button
+                                onClick={() => handleDelete(executive.id)}
+                                className="inline-flex items-center text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                                title="Delete executive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">Delete</span>
+                              </button>
+                            </div>
+                          </td>
+                        </motion.tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
             </div>
           </div>
