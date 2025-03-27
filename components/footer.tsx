@@ -81,8 +81,7 @@ export default function Footer() {
             <h4 className="text-white font-medium mb-4">Contact</h4>
             <address className="not-italic text-gray-400">
               <p>St. Joseph Higher Secondary School</p>
-              <p>Campus Address</p>
-              <p>City, State, ZIP</p>
+              <p>97 Asad Avenue, Dhaka-1207</p>
               <p className="mt-2">Email: jitc@sjs.edu.bd</p>
             </address>
           </div>
